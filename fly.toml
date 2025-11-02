@@ -4,46 +4,21 @@ primary_region = "sin"
 [build]
   dockerfile = "Dockerfile"
 
-[[vm]]
-  memory = "1024mb"
-  cpu_kind = "shared"
-  cpus = 1
-
 [env]
   FLASK_PORT = "8080"
   FLASK_DEBUG = "false"
   FLASK_APP = "app.py"
   PYTHONUNBUFFERED = "1"
-  LOG_LEVEL = "INFO"
 
 [[services]]
-  http_checks = []
   internal_port = 8080
-  processes = ["app"]
   protocol = "tcp"
-  script_checks = []
 
-[services.concurrency]
-  hard_limit = 25
-  soft_limit = 20
-  type = "connections"
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    force_https = true
 
-[[services.ports]]
-  force_https = true
-  handlers = ["http"]
-  port = 80
-
-[[services.ports]]
-  handlers = ["tls", "http"]
-  port = 443
-
-[checks]
-  [checks.health]
-    grace_period = "10s"
-    headers = {}
-    interval = "30s"
-    method = "GET"
-    timeout = "5s"
-    tls_skip_verify = false
-    type = "http"
-    url = "http://localhost:8080/health"
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
