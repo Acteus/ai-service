@@ -1,4 +1,4 @@
-app = "iso21001-ai-service"
+app = "ai-service-mezs5q"
 primary_region = "sin"
 
 [build]
@@ -23,10 +23,6 @@ primary_region = "sin"
   FLASK_APP = "app.py"
   PYTHONUNBUFFERED = "1"
   LOG_LEVEL = "INFO"
-
-[mounts]
-  source = "ai_service_data"
-  destination = "/data"
 
 [[services]]
   http_checks = []
