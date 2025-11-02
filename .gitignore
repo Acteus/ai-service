@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 # AI/ML Models and Data (Large files - don't commit to git)
-models/
+# models/  # Commented out - we want to deploy trained models
 *.h5
 *.pkl
 *.joblib
