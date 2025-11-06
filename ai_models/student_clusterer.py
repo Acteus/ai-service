@@ -178,13 +178,13 @@ class StudentClusterer:
 
             return {
                 'success': True,
-                'num_clusters': len(np.unique(labels)),
+                'num_clusters': int(len(np.unique(labels))),
                 'algorithm': algorithm,
                 'clusters': cluster_analysis,
                 'metrics': {
-                    'silhouette_score': round(silhouette, 3),
-                    'calinski_harabasz_score': round(calinski, 3),
-                    'total_samples': len(df),
+                    'silhouette_score': round(float(silhouette), 3),
+                    'calinski_harabasz_score': round(float(calinski), 3),
+                    'total_samples': int(len(df)),
                     'noise_points': int(np.sum(labels == -1)) if algorithm.lower() == 'dbscan' else 0
                 },
                 'insights': self._generate_clustering_insights(cluster_analysis),
@@ -204,7 +204,7 @@ class StudentClusterer:
         clusters = []
         
         # Get unique cluster labels (to handle DBSCAN which may have noise points labeled as -1)
-        unique_labels = sorted([label for label in np.unique(labels) if label != -1])
+        unique_labels = sorted([int(label) for label in np.unique(labels) if label != -1])
 
         for i in unique_labels:
             cluster_mask = labels == i
@@ -219,13 +219,13 @@ class StudentClusterer:
             performance_percentage = round((raw_gpa / 4.0) * 100, 2)
             
             cluster_stats = {
-                'cluster_id': i + 1 if i >= 0 else 0,  # Handle noise cluster for DBSCAN
-                'size': len(cluster_data),
-                'percentage': round(len(cluster_data) / len(df) * 100, 2),
-                'average_satisfaction': round(cluster_data.get('overall_satisfaction', pd.Series([0])).mean(), 2),
-                'average_performance': performance_percentage,
-                'average_attendance': round(cluster_data.get('attendance_rate', pd.Series([0])).mean(), 2),
-                'average_participation': round(cluster_data.get('participation_score', pd.Series([0])).mean(), 2),
+                'cluster_id': int(i + 1) if i >= 0 else 0,  # Handle noise cluster for DBSCAN
+                'size': int(len(cluster_data)),
+                'percentage': round(float(len(cluster_data)) / float(len(df)) * 100, 2),
+                'average_satisfaction': round(float(cluster_data.get('overall_satisfaction', pd.Series([0])).mean()), 2),
+                'average_performance': float(performance_percentage),
+                'average_attendance': round(float(cluster_data.get('attendance_rate', pd.Series([0])).mean()), 2),
+                'average_participation': round(float(cluster_data.get('participation_score', pd.Series([0])).mean()), 2),
                 'characteristics': self._identify_cluster_characteristics(cluster_data),
                 'risk_profile': self._assess_cluster_risk(cluster_data),
                 'recommended_interventions': self._generate_interventions(cluster_data)
@@ -308,7 +308,7 @@ class StudentClusterer:
         return {
             'risk_level': risk_level,
             'risk_factors': risk_factors,
-            'risk_score': len(risk_factors)
+            'risk_score': int(len(risk_factors))
         }
 
     def _generate_interventions(self, cluster_data):

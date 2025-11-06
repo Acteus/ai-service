@@ -73,6 +73,7 @@ def predict_compliance():
         # Process data and make prediction
         processed_data = data_processor.preprocess_compliance_data(data)
         prediction = compliance_predictor.predict(processed_data)
+        prediction = convert_numpy_types(prediction)
 
         logger.info(f"Compliance prediction completed for data: {data.get('id', 'unknown')}")
 
@@ -101,6 +102,7 @@ def analyze_sentiment():
 
         # Analyze sentiment
         sentiment_result = sentiment_analyzer.analyze_batch(comments)
+        sentiment_result = convert_numpy_types(sentiment_result)
 
         logger.info(f"Sentiment analysis completed for {len(comments)} comments")
 
@@ -132,6 +134,7 @@ def cluster_students():
         # Process and cluster data
         processed_data = data_processor.preprocess_clustering_data(responses)
         clusters = student_clusterer.cluster(processed_data, k)
+        clusters = convert_numpy_types(clusters)
 
         logger.info(f"Student clustering completed for {len(responses)} responses into {k} clusters")
 
@@ -164,6 +167,7 @@ def predict_performance():
 
         # Make prediction
         prediction = performance_predictor.predict(data)
+        prediction = convert_numpy_types(prediction)
 
         logger.info(f"Performance prediction completed for student data")
 
@@ -188,6 +192,7 @@ def predict_dropout_risk():
 
         # Make prediction
         prediction = dropout_predictor.predict(data)
+        prediction = convert_numpy_types(prediction)
 
         logger.info(f"Dropout risk prediction completed for student data")
 
@@ -212,6 +217,7 @@ def assess_risk():
 
         # Make prediction
         assessment = risk_assessment_predictor.predict(data)
+        assessment = convert_numpy_types(assessment)
 
         logger.info(f"Risk assessment completed for student data")
 
@@ -236,6 +242,7 @@ def predict_satisfaction_trend():
 
         # Make prediction
         trend_prediction = trend_predictor.predict(data)
+        trend_prediction = convert_numpy_types(trend_prediction)
 
         logger.info(f"Satisfaction trend prediction completed")
 
