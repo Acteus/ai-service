@@ -202,8 +202,11 @@ class StudentClusterer:
     def _analyze_clusters(self, df, labels, k):
         """Analyze characteristics of each cluster"""
         clusters = []
+        
+        # Get unique cluster labels (to handle DBSCAN which may have noise points labeled as -1)
+        unique_labels = sorted([label for label in np.unique(labels) if label != -1])
 
-        for i in range(k):
+        for i in unique_labels:
             cluster_mask = labels == i
             cluster_data = df[cluster_mask]
 
@@ -211,12 +214,16 @@ class StudentClusterer:
                 continue
 
             # Calculate cluster statistics
+            # Convert GPA (0-4.0 scale) to percentage (0-100% scale)
+            raw_gpa = cluster_data.get('grade_average', pd.Series([0])).mean()
+            performance_percentage = round((raw_gpa / 4.0) * 100, 2)
+            
             cluster_stats = {
-                'cluster_id': i + 1,
+                'cluster_id': i + 1 if i >= 0 else 0,  # Handle noise cluster for DBSCAN
                 'size': len(cluster_data),
                 'percentage': round(len(cluster_data) / len(df) * 100, 2),
                 'average_satisfaction': round(cluster_data.get('overall_satisfaction', pd.Series([0])).mean(), 2),
-                'average_performance': round(cluster_data.get('grade_average', pd.Series([0])).mean(), 2),
+                'average_performance': performance_percentage,
                 'average_attendance': round(cluster_data.get('attendance_rate', pd.Series([0])).mean(), 2),
                 'average_participation': round(cluster_data.get('participation_score', pd.Series([0])).mean(), 2),
                 'characteristics': self._identify_cluster_characteristics(cluster_data),
@@ -241,11 +248,11 @@ class StudentClusterer:
         else:
             characteristics.append("Low satisfaction learners")
 
-        # Analyze academic performance
+        # Analyze academic performance (GPA is on 0-4.0 scale)
         avg_grades = cluster_data.get('grade_average', pd.Series([0])).mean()
-        if avg_grades >= 3.5:
+        if avg_grades >= 3.5:  # 87.5%+
             characteristics.append("High academic performers")
-        elif avg_grades >= 2.5:
+        elif avg_grades >= 2.5:  # 62.5%+
             characteristics.append("Average academic performers")
         else:
             characteristics.append("Low academic performers")
@@ -276,7 +283,7 @@ class StudentClusterer:
         if cluster_data.get('overall_satisfaction', pd.Series([0])).mean() < 3.0:
             risk_factors.append("Low satisfaction")
 
-        # Poor academic performance
+        # Poor academic performance (GPA on 0-4.0 scale, <2.5 is ~62.5%)
         if cluster_data.get('grade_average', pd.Series([0])).mean() < 2.5:
             risk_factors.append("Poor academic performance")
 
@@ -309,13 +316,13 @@ class StudentClusterer:
         interventions = []
 
         avg_satisfaction = cluster_data.get('overall_satisfaction', pd.Series([0])).mean()
-        avg_performance = cluster_data.get('grade_average', pd.Series([0])).mean()
+        avg_performance = cluster_data.get('grade_average', pd.Series([0])).mean()  # GPA on 0-4.0 scale
         avg_safety = cluster_data.get('physical_safety_rating', pd.Series([0])).mean()
 
         if avg_satisfaction < 3.5:
             interventions.append("Implement targeted satisfaction improvement programs")
 
-        if avg_performance < 2.5:
+        if avg_performance < 2.5:  # <62.5%
             interventions.append("Provide academic support and tutoring services")
 
         if avg_safety < 3.5:
@@ -342,8 +349,8 @@ class StudentClusterer:
         if at_risk_clusters:
             insights.append(f"Identified {len(at_risk_clusters)} at-risk clusters requiring immediate attention")
 
-        # Performance insights
-        high_performers = [c for c in clusters if c['average_performance'] >= 3.5]
+        # Performance insights (average_performance is now in percentage format)
+        high_performers = [c for c in clusters if c['average_performance'] >= 87.5]  # 87.5% = 3.5 GPA
         if high_performers:
             insights.append(f"Found {len(high_performers)} high-performing clusters - identify and scale best practices")
 
@@ -368,9 +375,9 @@ class StudentClusterer:
         if safety_concern_clusters > 0:
             iso_insights.append(f"ISO 21001:7.2 - {safety_concern_clusters} clusters show safety concerns requiring attention")
 
-        # Performance differentiation
+        # Performance differentiation (performance is now in percentage format, so adjust threshold)
         performance_variance = np.var([c.get('average_performance', 0) for c in clusters])
-        if performance_variance > 0.5:
+        if performance_variance > 50:  # Adjusted threshold for percentage-based variance (was 0.5 for GPA scale)
             iso_insights.append("ISO 21001:7.1.2 - Significant performance variance indicates need for differentiated support strategies")
 
         # Intervention prioritization
