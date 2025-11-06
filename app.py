@@ -177,8 +177,11 @@ def predict_performance():
             'timestamp': datetime.utcnow().isoformat()
         })
 
+    except ValueError as e:
+        logger.error(f"Performance prediction validation error: {str(e)}")
+        return jsonify({'error': 'Invalid input data', 'details': str(e)}), 400
     except Exception as e:
-        logger.error(f"Performance prediction error: {str(e)}")
+        logger.error(f"Performance prediction error: {str(e)}", exc_info=True)
         return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
 @app.route('/api/v1/dropout/predict', methods=['POST'])
@@ -202,8 +205,11 @@ def predict_dropout_risk():
             'timestamp': datetime.utcnow().isoformat()
         })
 
+    except ValueError as e:
+        logger.error(f"Dropout risk prediction validation error: {str(e)}")
+        return jsonify({'error': 'Invalid input data', 'details': str(e)}), 400
     except Exception as e:
-        logger.error(f"Dropout risk prediction error: {str(e)}")
+        logger.error(f"Dropout risk prediction error: {str(e)}", exc_info=True)
         return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
 @app.route('/api/v1/risk/assess', methods=['POST'])
@@ -227,8 +233,11 @@ def assess_risk():
             'timestamp': datetime.utcnow().isoformat()
         })
 
+    except ValueError as e:
+        logger.error(f"Risk assessment validation error: {str(e)}")
+        return jsonify({'error': 'Invalid input data', 'details': str(e)}), 400
     except Exception as e:
-        logger.error(f"Risk assessment error: {str(e)}")
+        logger.error(f"Risk assessment error: {str(e)}", exc_info=True)
         return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
 @app.route('/api/v1/satisfaction/trend', methods=['POST'])
@@ -331,10 +340,12 @@ def predictive_analytics():
             return jsonify({'error': 'No data provided'}), 400
 
         results = {}
+        errors = []
 
         # Performance prediction with forecasting
         try:
             performance_pred = performance_predictor.predict(data)
+            performance_pred = convert_numpy_types(performance_pred)
             results['performance_forecast'] = {
                 'current_performance': performance_pred.get('predicted_gpa', 0),
                 'trend': 'stable',  # Would be calculated from historical data
@@ -342,11 +353,14 @@ def predictive_analytics():
                 'forecast_period': '3 months'
             }
         except Exception as e:
-            logger.warning(f"Performance forecasting failed: {e}")
+            error_msg = f"Performance forecasting failed: {str(e)}"
+            logger.warning(error_msg)
+            errors.append(error_msg)
 
         # Risk trend prediction
         try:
             risk_pred = risk_assessment_predictor.predict(data)
+            risk_pred = convert_numpy_types(risk_pred)
             results['risk_trend'] = {
                 'current_risk': risk_pred.get('overall_risk_score', 50),
                 'trend_direction': 'stable',
@@ -354,11 +368,14 @@ def predictive_analytics():
                 'confidence': risk_pred.get('confidence', 0.5)
             }
         except Exception as e:
-            logger.warning(f"Risk trend prediction failed: {e}")
+            error_msg = f"Risk trend prediction failed: {str(e)}"
+            logger.warning(error_msg)
+            errors.append(error_msg)
 
         # Satisfaction forecasting
         try:
             trend_pred = trend_predictor.predict(data)
+            trend_pred = convert_numpy_types(trend_pred)
             results['satisfaction_forecast'] = {
                 'current_level': trend_pred.get('current_satisfaction', 3.0),
                 'trend': trend_pred.get('trend_direction', 'stable'),
@@ -366,7 +383,18 @@ def predictive_analytics():
                 'confidence': trend_pred.get('confidence', 0.5)
             }
         except Exception as e:
-            logger.warning(f"Satisfaction forecasting failed: {e}")
+            error_msg = f"Satisfaction forecasting failed: {str(e)}"
+            logger.warning(error_msg)
+            errors.append(error_msg)
+
+        # Check if we have at least some successful results
+        if not results:
+            logger.error(f"All predictive models failed. Errors: {errors}")
+            return jsonify({
+                'error': 'All predictive models failed',
+                'details': errors,
+                'suggestion': 'Please ensure the request data includes all required fields for at least one model'
+            }), 500
 
         # Generate predictive insights
         insights = []
@@ -385,13 +413,22 @@ def predictive_analytics():
             if sat['trend'] == 'declining':
                 insights.append("Satisfaction trend analysis shows declining pattern - immediate quality improvement actions required")
 
-        return jsonify({
+        # Convert numpy types to Python types for JSON serialization
+        results = convert_numpy_types(results)
+
+        response_data = {
             'success': True,
             'prediction': results,
             'predictive_insights': insights,
             'model_used': 'Multi-Model Predictive Ensemble',
             'timestamp': datetime.utcnow().isoformat()
-        })
+        }
+        
+        # Include any partial errors if some models failed
+        if errors:
+            response_data['warnings'] = errors
+
+        return jsonify(response_data)
 
     except Exception as e:
         logger.error(f"Predictive analytics error: {str(e)}")
@@ -408,6 +445,7 @@ def comprehensive_risk_assessment():
 
         # Use the risk assessment predictor for comprehensive evaluation
         assessment = risk_assessment_predictor.predict(data)
+        assessment = convert_numpy_types(assessment)
 
         return jsonify({
             'success': True,
@@ -430,6 +468,7 @@ def trend_analysis():
 
         # Use the trend predictor for analysis
         trend_prediction = trend_predictor.predict(data)
+        trend_prediction = convert_numpy_types(trend_prediction)
 
         return jsonify({
             'success': True,
