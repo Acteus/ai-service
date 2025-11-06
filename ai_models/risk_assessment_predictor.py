@@ -248,51 +248,58 @@ class RiskAssessmentPredictor:
         }
 
         if isinstance(data, dict):
+            # Helper function to safely convert to float
+            def to_float(value, default):
+                try:
+                    return float(value) if value is not None else default
+                except (ValueError, TypeError):
+                    return default
+
             # Academic Risk (30% weight)
             academic_factors = [
-                data.get('academic_progress_rating', 5),
-                data.get('skill_development_rating', 5),
-                data.get('critical_thinking_improvement', 5),
-                data.get('grade_average', 2.5) * 2  # Convert GPA to 1-5 scale
+                to_float(data.get('academic_progress_rating'), 5),
+                to_float(data.get('skill_development_rating'), 5),
+                to_float(data.get('critical_thinking_improvement'), 5),
+                to_float(data.get('grade_average'), 2.5) * 2  # Convert GPA to 1-5 scale
             ]
             academic_score = np.mean(academic_factors)
             risk_components['academic_risk'] = max(0, (5 - academic_score) / 5) * 100
 
             # Engagement Risk (25% weight)
             engagement_factors = [
-                data.get('attendance_rate', 100) / 20,  # Convert to 1-5 scale
-                data.get('participation_score', 5),
-                data.get('peer_interaction_satisfaction', 5),
-                data.get('extracurricular_satisfaction', 5)
+                to_float(data.get('attendance_rate'), 100) / 20,  # Convert to 1-5 scale
+                to_float(data.get('participation_score'), 5),
+                to_float(data.get('peer_interaction_satisfaction'), 5),
+                to_float(data.get('extracurricular_satisfaction'), 5)
             ]
             engagement_score = np.mean(engagement_factors)
             risk_components['engagement_risk'] = max(0, (5 - engagement_score) / 5) * 100
 
             # Safety Risk (20% weight)
             safety_factors = [
-                data.get('physical_safety_rating', 5),
-                data.get('psychological_safety_rating', 5),
-                data.get('bullying_prevention_effectiveness', 5),
-                data.get('emergency_preparedness_rating', 5)
+                to_float(data.get('physical_safety_rating'), 5),
+                to_float(data.get('psychological_safety_rating'), 5),
+                to_float(data.get('bullying_prevention_effectiveness'), 5),
+                to_float(data.get('emergency_preparedness_rating'), 5)
             ]
             safety_score = np.mean(safety_factors)
             risk_components['safety_risk'] = max(0, (5 - safety_score) / 5) * 100
 
             # Wellbeing Risk (15% weight)
             wellbeing_factors = [
-                data.get('mental_health_support_rating', 5),
-                data.get('stress_management_support', 5),
-                data.get('physical_health_support', 5),
-                data.get('overall_wellbeing_rating', 5)
+                to_float(data.get('mental_health_support_rating'), 5),
+                to_float(data.get('stress_management_support'), 5),
+                to_float(data.get('physical_health_support'), 5),
+                to_float(data.get('overall_wellbeing_rating'), 5)
             ]
             wellbeing_score = np.mean(wellbeing_factors)
             risk_components['wellbeing_risk'] = max(0, (5 - wellbeing_score) / 5) * 100
 
             # Satisfaction Risk (10% weight)
             satisfaction_factors = [
-                data.get('overall_satisfaction', 5),
-                data.get('teaching_quality_rating', 5),
-                data.get('learning_environment_rating', 5)
+                to_float(data.get('overall_satisfaction'), 5),
+                to_float(data.get('teaching_quality_rating'), 5),
+                to_float(data.get('learning_environment_rating'), 5)
             ]
             satisfaction_score = np.mean(satisfaction_factors)
             risk_components['satisfaction_risk'] = max(0, (5 - satisfaction_score) / 5) * 100
@@ -356,48 +363,55 @@ class RiskAssessmentPredictor:
         breakdown = {}
 
         if isinstance(data, dict):
+            # Helper function to safely convert to float
+            def to_float(value, default):
+                try:
+                    return float(value) if value is not None else default
+                except (ValueError, TypeError):
+                    return default
+
             # Learning Environment Risk
             learning_factors = [
-                data.get('curriculum_relevance_rating', 3),
-                data.get('learning_pace_appropriateness', 3),
-                data.get('teaching_quality_rating', 3),
-                data.get('learning_environment_rating', 3)
+                to_float(data.get('curriculum_relevance_rating'), 3),
+                to_float(data.get('learning_pace_appropriateness'), 3),
+                to_float(data.get('teaching_quality_rating'), 3),
+                to_float(data.get('learning_environment_rating'), 3)
             ]
             breakdown['learning_environment'] = round(max(0, (5 - np.mean(learning_factors)) / 5) * 100, 2)
 
             # Academic Performance Risk
             academic_factors = [
-                data.get('academic_progress_rating', 3),
-                data.get('skill_development_rating', 3),
-                data.get('critical_thinking_improvement', 3),
-                data.get('grade_average', 2.5) * 2
+                to_float(data.get('academic_progress_rating'), 3),
+                to_float(data.get('skill_development_rating'), 3),
+                to_float(data.get('critical_thinking_improvement'), 3),
+                to_float(data.get('grade_average'), 2.5) * 2
             ]
             breakdown['academic_performance'] = round(max(0, (5 - np.mean(academic_factors)) / 5) * 100, 2)
 
             # Safety Risk
             safety_factors = [
-                data.get('physical_safety_rating', 3),
-                data.get('psychological_safety_rating', 3),
-                data.get('bullying_prevention_effectiveness', 3),
-                data.get('emergency_preparedness_rating', 3)
+                to_float(data.get('physical_safety_rating'), 3),
+                to_float(data.get('psychological_safety_rating'), 3),
+                to_float(data.get('bullying_prevention_effectiveness'), 3),
+                to_float(data.get('emergency_preparedness_rating'), 3)
             ]
             breakdown['safety'] = round(max(0, (5 - np.mean(safety_factors)) / 5) * 100, 2)
 
             # Wellbeing Risk
             wellbeing_factors = [
-                data.get('mental_health_support_rating', 3),
-                data.get('stress_management_support', 3),
-                data.get('physical_health_support', 3),
-                data.get('overall_wellbeing_rating', 3)
+                to_float(data.get('mental_health_support_rating'), 3),
+                to_float(data.get('stress_management_support'), 3),
+                to_float(data.get('physical_health_support'), 3),
+                to_float(data.get('overall_wellbeing_rating'), 3)
             ]
             breakdown['wellbeing'] = round(max(0, (5 - np.mean(wellbeing_factors)) / 5) * 100, 2)
 
             # Engagement Risk
             engagement_factors = [
-                data.get('attendance_rate', 75) / 15,
-                data.get('participation_score', 3),
-                data.get('peer_interaction_satisfaction', 3),
-                data.get('overall_satisfaction', 3)
+                to_float(data.get('attendance_rate'), 75) / 15,
+                to_float(data.get('participation_score'), 3),
+                to_float(data.get('peer_interaction_satisfaction'), 3),
+                to_float(data.get('overall_satisfaction'), 3)
             ]
             breakdown['engagement'] = round(max(0, (5 - np.mean(engagement_factors)) / 5) * 100, 2)
 

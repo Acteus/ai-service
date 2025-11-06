@@ -240,11 +240,18 @@ class StudentPerformancePredictor:
     def _rule_based_prediction(self, data):
         """Fallback rule-based performance prediction"""
         if isinstance(data, dict):
+            # Helper function to safely convert to float
+            def to_float(value, default):
+                try:
+                    return float(value) if value is not None else default
+                except (ValueError, TypeError):
+                    return default
+
             # Simple weighted calculation based on key factors
-            attendance = data.get('attendance_rate', 0) / 100  # Convert to 0-1
-            participation = data.get('participation_score', 0) / 5  # Convert to 0-1
-            satisfaction = data.get('overall_satisfaction', 0) / 5
-            progress = data.get('academic_progress_rating', 0) / 5
+            attendance = to_float(data.get('attendance_rate'), 0) / 100  # Convert to 0-1
+            participation = to_float(data.get('participation_score'), 0) / 5  # Convert to 0-1
+            satisfaction = to_float(data.get('overall_satisfaction'), 0) / 5
+            progress = to_float(data.get('academic_progress_rating'), 0) / 5
 
             # Weighted prediction
             prediction = (
@@ -327,15 +334,22 @@ class StudentPerformancePredictor:
             recommendations.append("Conduct comprehensive learning needs assessment")
 
         if isinstance(data, dict):
-            attendance = data.get('attendance_rate', 0)
+            # Helper function to safely convert to float
+            def to_float(value, default):
+                try:
+                    return float(value) if value is not None else default
+                except (ValueError, TypeError):
+                    return default
+
+            attendance = to_float(data.get('attendance_rate'), 0)
             if attendance < 75:
                 recommendations.append("CRITICAL: Address attendance issues through counseling and support services")
 
-            satisfaction = data.get('overall_satisfaction', 0)
+            satisfaction = to_float(data.get('overall_satisfaction'), 0)
             if satisfaction < 3.0:
                 recommendations.append("PRIORITY: Improve learner satisfaction through curriculum and teaching enhancements")
 
-            participation = data.get('participation_score', 0)
+            participation = to_float(data.get('participation_score'), 0)
             if participation < 3.0:
                 recommendations.append("Increase student engagement through interactive learning activities")
 

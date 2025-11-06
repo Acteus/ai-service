@@ -247,33 +247,40 @@ class DropoutRiskPredictor:
         risk_factors = []
 
         if isinstance(data, dict):
+            # Helper function to safely convert to float
+            def to_float(value, default):
+                try:
+                    return float(value) if value is not None else default
+                except (ValueError, TypeError):
+                    return default
+
             # Attendance factor
-            attendance = data.get('attendance_rate', 100)
+            attendance = to_float(data.get('attendance_rate'), 100)
             if attendance < 75:
                 risk_score += 0.3
                 risk_factors.append('Low attendance')
 
             # Satisfaction factor
-            satisfaction = data.get('overall_satisfaction', 5)
+            satisfaction = to_float(data.get('overall_satisfaction'), 5)
             if satisfaction < 3:
                 risk_score += 0.25
                 risk_factors.append('Low satisfaction')
 
             # Academic progress factor
-            progress = data.get('academic_progress_rating', 5)
+            progress = to_float(data.get('academic_progress_rating'), 5)
             if progress < 3:
                 risk_score += 0.2
                 risk_factors.append('Poor academic progress')
 
             # Safety factors
-            safety = data.get('physical_safety_rating', 5)
-            psych_safety = data.get('psychological_safety_rating', 5)
+            safety = to_float(data.get('physical_safety_rating'), 5)
+            psych_safety = to_float(data.get('psychological_safety_rating'), 5)
             if safety < 3 or psych_safety < 3:
                 risk_score += 0.15
                 risk_factors.append('Safety concerns')
 
             # Participation factor
-            participation = data.get('participation_score', 5)
+            participation = to_float(data.get('participation_score'), 5)
             if participation < 3:
                 risk_score += 0.1
                 risk_factors.append('Low participation')
@@ -347,25 +354,32 @@ class DropoutRiskPredictor:
         risk_factors = []
 
         if isinstance(data, dict):
-            if data.get('attendance_rate', 100) < 75:
+            # Helper function to safely convert to float
+            def to_float(value, default):
+                try:
+                    return float(value) if value is not None else default
+                except (ValueError, TypeError):
+                    return default
+
+            if to_float(data.get('attendance_rate'), 100) < 75:
                 risk_factors.append('Low attendance rate')
 
-            if data.get('overall_satisfaction', 5) < 3:
+            if to_float(data.get('overall_satisfaction'), 5) < 3:
                 risk_factors.append('Low overall satisfaction')
 
-            if data.get('academic_progress_rating', 5) < 3:
+            if to_float(data.get('academic_progress_rating'), 5) < 3:
                 risk_factors.append('Poor academic progress')
 
-            if data.get('physical_safety_rating', 5) < 3:
+            if to_float(data.get('physical_safety_rating'), 5) < 3:
                 risk_factors.append('Physical safety concerns')
 
-            if data.get('psychological_safety_rating', 5) < 3:
+            if to_float(data.get('psychological_safety_rating'), 5) < 3:
                 risk_factors.append('Psychological safety concerns')
 
-            if data.get('mental_health_support_rating', 5) < 3:
+            if to_float(data.get('mental_health_support_rating'), 5) < 3:
                 risk_factors.append('Mental health concerns')
 
-            if data.get('participation_score', 5) < 3:
+            if to_float(data.get('participation_score'), 5) < 3:
                 risk_factors.append('Low class participation')
 
         return risk_factors
@@ -398,13 +412,20 @@ class DropoutRiskPredictor:
 
         # Add specific recommendations based on identified risk factors
         if isinstance(data, dict):
-            if data.get('attendance_rate', 100) < 75:
+            # Helper function to safely convert to float
+            def to_float(value, default):
+                try:
+                    return float(value) if value is not None else default
+                except (ValueError, TypeError):
+                    return default
+
+            if to_float(data.get('attendance_rate'), 100) < 75:
                 recommendations.append("Address attendance issues through flexible scheduling or transportation support")
 
-            if data.get('overall_satisfaction', 5) < 3:
+            if to_float(data.get('overall_satisfaction'), 5) < 3:
                 recommendations.append("Conduct satisfaction survey and implement improvements based on feedback")
 
-            if data.get('physical_safety_rating', 5) < 3 or data.get('psychological_safety_rating', 5) < 3:
+            if to_float(data.get('physical_safety_rating'), 5) < 3 or to_float(data.get('psychological_safety_rating'), 5) < 3:
                 recommendations.append("Review and enhance safety protocols and support services")
 
         return recommendations
